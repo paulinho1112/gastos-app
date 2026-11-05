@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: gastos
+      POSTGRES_PASSWORD: gastos123
+      POSTGRES_DB: gastosdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gastos -d gastosdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./api
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://gastos:gastos123@db:5432/gastosdb
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
